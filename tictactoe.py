@@ -1,133 +1,142 @@
-board = [' ' for x in range(10)]
+# Spelbrädet med 10 positioner (ignorera index 0)
+bräde = [' ' for x in range(10)]
 
-def läggnummer(letter,pos):
-    board[pos] = letter
+# Funktion för att placera en spelares eller datorns symbol på en given position
+def placeraSymbol(symbol, position):
+    bräde[position] = symbol
 
-def rutaärledig(pos):
-    return board[pos] == ' '
+# Funktion för att kontrollera om en position på spelplanen är ledig
+def ärPlatsLedig(position):
+    return bräde[position] == ' '
 
-def printBräde(board):
+# Funktion för att skriva ut spelplanen i terminalen
+def skrivUtSpelbräde(spelbräde):
     print('   |   |   ')
-    print(' ' + board[1] + ' | ' + board[2] + ' | ' + board[3])
+    print(' ' + spelbräde[1] + ' | ' + spelbräde[2] + ' | ' + spelbräde[3])
     print('   |   |   ')
     print('------------')
     print('   |   |   ')
-    print(' ' + board[4] + ' | ' + board[5] + ' | ' + board[6])
+    print(' ' + spelbräde[4] + ' | ' + spelbräde[5] + ' | ' + spelbräde[6])
     print('   |   |   ')
     print('------------')
     print('   |   |   ')
-    print(' ' + board[7] + ' | ' + board[8] + ' | ' + board[9])
+    print(' ' + spelbräde[7] + ' | ' + spelbräde[8] + ' | ' + spelbräde[9])
     print('   |   |   ')
 
-def ärbrädetfullt(board):
-    if board.count(' ') > 1:
+# Funktion för att kontrollera om brädet är fullt
+def ärSpelbrädetFullt(spelbräde):
+    if spelbräde.count(' ') > 1:
         return False
     else:
         return True
 
-def ärvinnare(b,l):
-    return ((b[1] == l and b[2] == l and b[3] == l) or
-    (b[4] == l and b[5] == l and b[6] == l) or
-    (b[7] == l and b[8] == l and b[9] == l) or
-    (b[1] == l and b[4] == l and b[7] == l) or
-    (b[2] == l and b[5] == l and b[8] == l) or
-    (b[3] == l and b[6] == l and b[9] == l) or
-    (b[1] == l and b[5] == l and b[9] == l) or
-    (b[3] == l and b[5] == l and b[7] == l))
-
-def flyttaspelare():
-    run = True
-    while run:
-        move = input("Snälla välj en position för att välja värde för X mellan 1 till 9\n")
+# Funktion för att kontrollera om en spelare har vunnit
+def ärVinnare(spelbräde, symbol):
+    # Vinnande kombinationer för tre i rad
+    vinnande_kombinationer = [
+        # Horisontella
+        [1, 2, 3], [4, 5, 6], [7, 8, 9], 
+        # Vertikala 
+        [1, 4, 7], [2, 5, 8], [3, 6, 9],  
+        # Diagonala
+        [1, 5, 9], [3, 5, 7]              
+    ]
+    
+# Funktion för spelarens drag
+def spelarensDrag():
+    kör = True
+    while kör:
+        drag = input("Vänligen välj en position att placera X mellan 1 och 9\n")
         try:
-            move = int(move)
-            if move > 0 and move < 10:
-                if rutaärledig(move):
-                    run = False
-                    läggnummer('X' , move)
+            drag = int(drag)
+            if 0 < drag < 10:
+                if ärPlatsLedig(drag):
+                    kör = False
+                    placeraSymbol('X', drag)
                 else:
-                    print('Snälla, den här rutan är upptagen')
+                    print('Tyvärr, den här platsen är upptagen')
             else:
-                print('snälla välj ett nummer mellan 1 och 9')
+                print('Ange ett nummer mellan 1 och 9')
 
-        except:
-            print('Snälla skriv ett nummer')
+        except ValueError:
+            print('Vänligen ange ett nummer')
 
-def datorflytta():
-    possibleMoves = [x for x , letter in enumerate(board) if letter == ' ' and x != 0  ]
-    move = 0
+# Funktion för datorns drag
+def datornsDrag():
+    möjligaDrag = [x for x, symbol in enumerate(bräde) if symbol == ' ' and x != 0]
+    drag = 0
 
-    for let in ['O' , 'X']:
-        for i in possibleMoves:
-            boardcopy = board[:]
-            boardcopy[i] = let
-            if ärvinnare(boardcopy, let):
-                move = i
-                return move
+    for symbol in ['O', 'X']:
+        for i in möjligaDrag:
+            kopiaAvSpelbräde = bräde[:]
+            kopiaAvSpelbräde[i] = symbol
+            if ärVinnare(kopiaAvSpelbräde, symbol):
+                drag = i
+                return drag
 
-    öppnahörn = []
-    for i in possibleMoves:
-        if i in [1 , 3 , 7 , 9]:
-            öppnahörn.append(i)
+    hörnLediga = []
+    for i in möjligaDrag:
+        if i in [1, 3, 7, 9]:
+            hörnLediga.append(i)
 
-    if len(öppnahörn) > 0:
-        move = väljRandom(öppnahörn)
-        return move
+    if len(hörnLediga) > 0:
+        drag = slumpmässigtVal(hörnLediga)
+        return drag
 
-    if 5 in possibleMoves:
-        move = 5
-        return move
+    if 5 in möjligaDrag:
+        drag = 5
+        return drag
 
-    edgesOpen = []
-    for i in possibleMoves:
-        if i in [2,4,6,8]:
-            edgesOpen.append(i)
+    kanterLediga = []
+    for i in möjligaDrag:
+        if i in [2, 4, 6, 8]:
+            kanterLediga.append(i)
 
-    if len(edgesOpen) > 0:
-        move = väljRandom(edgesOpen)
-        return move
+    if len(kanterLediga) > 0:
+        drag = slumpmässigtVal(kanterLediga)
+        return drag
 
-def väljRandom(li):
+# Funktion för slumpmässigt val
+def slumpmässigtVal(lista):
     import random
-    ln = len(li)
-    r = random.randrange(0,ln)
-    return li[r]
+    ln = len(lista)
+    r = random.randrange(0, ln)
+    return lista[r]
 
-def main():
-    print("Wälkommen till spelet!")
-    printBräde(board)
+# Huvudfunktionen för att köra spelet
+def huvud():
+    print("Välkommen till spelet!")
+    skrivUtSpelbräde(bräde)
 
-    while not(ärbrädetfullt(board)):
-        if not(ärvinnare(board , 'O')):
-            flyttaspelare()
-            printBräde(board)
+    while not ärSpelbrädetFullt(bräde):
+        if not ärVinnare(bräde, 'O'):
+            spelarensDrag()
+            skrivUtSpelbräde(bräde)
         else:
-            print("Fölråt du förlora!")
+            print("Bra försök, spela igen!")
             break
 
-        if not(ärvinnare(board , 'X')):
-            move = datorflytta()
-            if move == 0:
+        if not ärVinnare(bräde, 'X'):
+            drag = datornsDrag()
+            if drag == 0:
                 print(" ")
             else:
-                läggnummer('O' , move)
-                print('Datorn placerade ett o på positionen' , move , ':')
-                printBräde(board)
+                placeraSymbol('O', drag)
+                print('Datorn placerade en O på position', drag, ':')
+                skrivUtSpelbräde(bräde)
         else:
             print("Du vann!")
             break
 
+    if ärSpelbrädetFullt(bräde):
+        print("Oavgjort!")
 
-
-
-    if ärbrädetfullt(board):
-        print("Det blev oavgjort")
-
+# Huvudloop för att spela igen
 while True:
-    x = input("Vill du köra? tryck y för ja eller n för nej (y/n)\n")
+    x = input("Vill du spela? Tryck 'y' för ja eller 'n' för nej (y/n)\n")
     if x.lower() == 'y':
-        board = [' ' for x in range(10)]
+        bräde = [' ' for x in range(10)]
         print('--------------------')
-        main()
+        huvud()
     else:
         break
